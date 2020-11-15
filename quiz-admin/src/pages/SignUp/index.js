@@ -58,15 +58,16 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Login = ({ history }) => {
+const SignUp = ( ) => {
   const {
-    signin,
+    signup,
     clearErrorMessage,
     state: { error },
   } = useContext(AuthContext);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordConfirmation, setPasswordConfirmation] = useState("");
   const classes = useStyles();
 
   useEffect(()=>{
@@ -83,7 +84,7 @@ const Login = ({ history }) => {
             <LockOutlinedIcon />
           </Avatar>
           <Typography component="h1" variant="h5">
-            Login
+            Sign Up
           </Typography>
           <form className={classes.form} noValidate>
             <TextField
@@ -112,15 +113,28 @@ const Login = ({ history }) => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
+            <TextField
+              variant="outlined"
+              margin="normal"
+              required
+              fullWidth
+              name="passwordConfirmation"
+              label="Confirmation Password"
+              type="password"
+              id="passwordConfirmation"
+              autoComplete="current-password"
+              value={passwordConfirmation}
+              onChange={(e) => setPasswordConfirmation(e.target.value)}
+            />
             {error}
             <Button
               fullWidth
               variant="contained"
               color="primary"
               className={classes.submit}
-              onClick={() => signin({ email, password, history })}
+              onClick={() => signup({ email, password, passwordConfirmation })}
             >
-              Sign In
+              Create Account
             </Button>
             <Grid container>
               <Grid item xs>
@@ -133,9 +147,9 @@ const Login = ({ history }) => {
             </Grid>
             <Grid container>
               <Grid item xs>
-                <Link className={classes.link} to="/signup">
+                <Link className={classes.link} to="/login">
                   <Typography component="p" variant="body2">
-                    Don't have an account? Sign Up instead.
+                    Already have an account? Login instead.
                   </Typography>
                 </Link>
               </Grid>
@@ -149,4 +163,4 @@ const Login = ({ history }) => {
     </Grid>
   );
 };
-export default Login;
+export default SignUp;

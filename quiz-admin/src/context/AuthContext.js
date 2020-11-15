@@ -226,8 +226,12 @@ const signout = (dispatch) => async () => {
   auth.signOut();
 };
 
+const clearErrorMessage = (dispatch) => async ()=>{
+  dispatch({ type: "clear_error_message"});
+}
+
 export const { Provider, Context } = createDataContext(
   authReducer,
-  { signout, signup, signin, sendConfirmationEmail, sendRecoveryEmail },
+  { signout, signup, signin, sendConfirmationEmail, sendRecoveryEmail, clearErrorMessage },
   { error: "", confirmationMessage: "", email: "" }
 );
