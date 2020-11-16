@@ -25,7 +25,7 @@ const signin = (dispatch) => async ({ email, password, history }) => {
   if (email && password) {
     try {
       let { user } = await auth.signInWithEmailAndPassword(email, password);
-      history.push("/dashboard");
+      localStorage.setItem( 'email', email.replace('.','dot') );
       dispatch({ type: "set_local_email", payload: user.email });
     } catch (error) {
       let errorMessage = "";

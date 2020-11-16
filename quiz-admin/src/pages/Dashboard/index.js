@@ -1,21 +1,22 @@
-import React, { useContext } from "react";
+import React, { useContext,useEffect } from "react";
 import clsx from "clsx";
 import { makeStyles } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import Drawer from "@material-ui/core/Drawer";
-import Box from "@material-ui/core/Box";
+
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import List from "@material-ui/core/List";
 import Typography from "@material-ui/core/Typography";
 import Divider from "@material-ui/core/Divider";
 import IconButton from "@material-ui/core/IconButton";
-import Container from "@material-ui/core/Container";
-import Grid from "@material-ui/core/Grid";
 import MenuIcon from "@material-ui/icons/Menu";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import ExitToAppIcon from "@material-ui/icons/ExitToApp";
 import { mainListItems } from "./listItems";
+import {VistaClase} from './vistaClases';
+import {VistaPreguntas} from './vistaPreguntas';
+import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
 import { Context as AuthContext } from "../../context/AuthContext";
 const Copyright = () => {
   return (
@@ -108,22 +109,35 @@ const useStyles = makeStyles((theme) => ({
 
 const Dashboard = () => {
   const classes = useStyles();
-  const [open, setOpen] = React.useState(false);
+  const [currentScreen, setcurrentScreen] = React.useState(null);
+  const [openDrawer,setOpenDrawer] = React.useState(false);
+  const [classData,setclassData] = React.useState(null)
   const {signout} = useContext(AuthContext);
   
+  
+    
   const handleDrawerOpen = () => {
-    setOpen(true);
+    setOpenDrawer(true);
   };
   const handleDrawerClose = () => {
-    setOpen(false);
+    setOpenDrawer(false);
   };
+  const handleDataCallback = (data) =>{
+    setclassData(data)
+  }
+  const handleDelClassData = () =>{
+    setclassData(null)
+  }
+  
+
+  
 
   return (
     <div className={classes.root}>
       <CssBaseline />
       <AppBar
         position="absolute"
-        className={clsx(classes.appBar, open && classes.appBarShift)}
+        className={clsx(classes.appBar, openDrawer && classes.appBarShift)}
       >
         <Toolbar className={classes.toolbar}>
           <IconButton
@@ -133,11 +147,14 @@ const Dashboard = () => {
             onClick={handleDrawerOpen}
             className={clsx(
               classes.menuButton,
-              open && classes.menuButtonHidden
+              openDrawer && classes.menuButtonHidden
             )}
           >
             <MenuIcon />
           </IconButton>
+          {classData != null ? <IconButton color="inherit" onClick={handleDelClassData}>
+            <ArrowBackIosIcon/>
+          </IconButton> : <span></span>}
           <Typography
             component="h1"
             variant="h6"
@@ -145,7 +162,7 @@ const Dashboard = () => {
             noWrap
             className={classes.title}
           >
-            INVEX
+            Dashboard
           </Typography>
           <IconButton color="inherit" onClick={()=>signout()}>
             <ExitToAppIcon />
@@ -155,9 +172,9 @@ const Dashboard = () => {
       <Drawer
         variant="permanent"
         classes={{
-          paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
+          paper: clsx(classes.drawerPaper, !openDrawer && classes.drawerPaperClose),
         }}
-        open={open}
+        open={openDrawer}
       >
         <div className={classes.toolbarIcon}>
           <IconButton onClick={handleDrawerClose}>
@@ -169,13 +186,10 @@ const Dashboard = () => {
       </Drawer>
       <main className={classes.content}>
         <div className={classes.appBarSpacer} />
-        <Container maxWidth="lg" className={classes.container}>
-          <Grid container spacing={3}></Grid>
-          <Box pt={4}>
-            <Copyright />
-          </Box>
-        </Container>
+        {classData != null ? <VistaPreguntas {...{classData}}/> : <VistaClase  {...{handleDataCallback}}/>}
+        
       </main>
+      
     </div>
   );
 };

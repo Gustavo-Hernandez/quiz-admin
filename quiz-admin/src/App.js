@@ -45,7 +45,6 @@ const theme = createMuiTheme({
 
 function App() {
   const [isAuthenticated, isVerified] = useAuthentication();
-
   const setNavigator = () => {
     if (isAuthenticated) {
       if (isVerified) {

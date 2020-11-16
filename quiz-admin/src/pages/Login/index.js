@@ -141,7 +141,7 @@ const Login = ({ history }) => {
               </Grid>
             </Grid>
             <Box mt={5}>
-              <Copyright />
+              
             </Box>
           </form>
         </div>
