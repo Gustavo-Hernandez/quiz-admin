@@ -24,7 +24,7 @@ const joinSession = (dispatch) => async ({ formattedPin, username, history }) =>
       if(data.success){
         let {user} = data;
         localStorage.setItem("session", JSON.stringify({user, pin:formattedPin, isActive:true}));
-        dispatch({type: "set_session", payload:{user, pin:formattedPin,isActive:true}});
+        dispatch({type: "set_session", payload:{user, pin:formattedPin,isActive:true, questions: data.questions, title:data.title}});
         history.push("/app");
       }
       else{

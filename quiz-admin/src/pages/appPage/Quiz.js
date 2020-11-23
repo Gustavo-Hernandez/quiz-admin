@@ -49,11 +49,11 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Quiz = ({ question }) => {
+const Quiz = ({ question, title }) => {
   const classes = useStyles();
   return (
     <div className={classes.root}>
-      <h3 className={classes.questionHeader}>Quiz Header</h3>
+      <h3 className={classes.questionHeader}>{title}</h3>
       <div className={classes.questionContainer}>
         <div className={classes.question}>This is a question</div>
       </div>

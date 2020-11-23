@@ -17,8 +17,9 @@ import {
   disconnectSocket,
   subscribeToChat,
   subscribeToFeedback,
-  sendFeedback,
+  sendStartQuiz,
   sendMessage,
+  subscribeToQuiz
 } from "../../api/socketHandler";
 import Chat from "./Chat";
 import Quiz from "./Quiz";
@@ -62,11 +63,13 @@ const Dashboard = () => {
     clearSession,
   } = useContext(QuizContext);
 
+  const {questions, title} = session;
   const [showChat, setShowChat] = useState(false);
   const [showSnackbar, setShowSnackbar] = useState(false);
   const [snackMessage, setSnackMessage] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
   const [chatMessages, setChatMessages] = useState([]);
+  const [showQuiz, setShowQuiz] = useState(false);
   const classes = useStyles();
 
   //Handle Connection
@@ -84,6 +87,12 @@ const Dashboard = () => {
       }
       setShowSnackbar(true);
       setSnackMessage(data);
+    });
+    subscribeToQuiz((err, data) => {
+      if (err) {
+        return;
+      }
+      setShowQuiz(true);
     });
     return () => {
       disconnectSocket();
@@ -136,33 +145,15 @@ const Dashboard = () => {
           End Session
         </Button>
       <p style={{ fontWeight: "bold",color: "white",fontSize: "15px" }}>PIN : {session.pin}</p>
-        <ButtonGroup
-          color="primary"
-          variant="contained"
-          aria-label="contained primary button group"
-        >
-          <Tooltip title="This is anonymous, no one will know.">
-            <Button
-              style={{ fontWeight: "bold",color: "white" }}
-              disabled
-              onClick={() => sendFeedback("I'm confused!", session.pin)}
-            >
-              8 Students are confused
-            </Button>
-          </Tooltip>
-          <Tooltip title="This is anonymous, no one will know.">
-            <Button
-              style={{ fontWeight: "bold",color: "white" }}
-              disabled
-              onClick={() => sendFeedback("Please slow down!", session.pin)}
-            >
-              5 Students whant you to slow down
-            </Button>
-          </Tooltip>
-        </ButtonGroup>
       </div>
       <div className={classes.quizContainer}>
-        <Quiz />
+        {showQuiz ? <Quiz title={title} /> :   <Button
+          variant="contained"
+          onClick={()=>sendStartQuiz(session.pin)}
+          className={classes.buttonExit}
+        >
+          Start Quiz
+        </Button>}
       </div>
       <Popover
         id={id}

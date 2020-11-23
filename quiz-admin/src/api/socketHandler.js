@@ -27,6 +27,16 @@ export const subscribeToChat = (cb) => {
   });
 };
 
+export const subscribeToQuiz = (cb) => {
+  if (!socket) {
+    return true;
+  }
+  socket.on("quiz_start", (val) => {
+    console.log("Quiz Starting");
+    return cb(null, val);
+  });
+};
+
 export const subscribeToFeedback = (cb) => {
   if (!socket) {
     return true;
@@ -46,5 +56,11 @@ export const sendMessage = (sender, message, room) => {
 export const sendFeedback = (value, room) => {
   if (socket) {
     socket.emit("teacher_feedback", {message: value, room});
+  }
+};
+
+export const sendStartQuiz = ( room) => {
+  if (socket) {
+    socket.emit("start_quiz", {room});
   }
 };
