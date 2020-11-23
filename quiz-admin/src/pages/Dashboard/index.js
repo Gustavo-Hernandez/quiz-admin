@@ -1,5 +1,7 @@
 import React, { useContext,useEffect } from "react";
 import clsx from "clsx";
+import axios from "axios";
+import quizHandler from "../../api/quizHandler";
 import { makeStyles } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import Drawer from "@material-ui/core/Drawer";
@@ -13,11 +15,18 @@ import IconButton from "@material-ui/core/IconButton";
 import MenuIcon from "@material-ui/icons/Menu";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import ExitToAppIcon from "@material-ui/icons/ExitToApp";
+import Button from '@material-ui/core/Button';
+import TextField from '@material-ui/core/TextField';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogTitle from '@material-ui/core/DialogTitle';
 import { mainListItems } from "./listItems";
 import {VistaClase} from './vistaClases';
 import {VistaPreguntas} from './vistaPreguntas';
 import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
 import { Context as AuthContext } from "../../context/AuthContext";
+import { Context as QuizContext } from "../../context/QuizContext";
 const Copyright = () => {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
@@ -107,9 +116,18 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Dashboard = () => {
+const Dashboard = ({history}) => {
   const classes = useStyles();
-  const [currentScreen, setcurrentScreen] = React.useState(null);
+  const {
+    state: { errorMessage },
+    joinSession,
+  } = useContext(QuizContext);
+  let [pin, setPin] = React.useState("");
+  let [username, setUsername] = React.useState("");
+  const [preguntas,setPreguntas] = React.useState([]);
+  const [nomClase,setNomClase] =  React.useState("");
+  const [desClase,setDesClase] =  React.useState("");
+  const [openDialog,setOpenDialog] = React.useState(false);
   const [openDrawer,setOpenDrawer] = React.useState(false);
   const [classData,setclassData] = React.useState(null)
   const {signout} = useContext(AuthContext);
@@ -122,11 +140,39 @@ const Dashboard = () => {
   const handleDrawerClose = () => {
     setOpenDrawer(false);
   };
-  const handleDataCallback = (data) =>{
-    setclassData(data)
+  const handleDataCallback = (obj,nom,des) =>{
+    setclassData(obj)
+    setNomClase(nom)
+    setDesClase(des)
   }
   const handleDelClassData = () =>{
     setclassData(null)
+  }
+  const handleOpenDialog = () =>{
+    setOpenDialog(true)
+  }
+  const handleCloseDialog = () =>{
+    setOpenDialog(false)
+  }
+  const handlePreguntas = (data) =>{
+    setPreguntas(data)
+  }
+  const crearSesion = () =>{
+    axios.post("http://localhost:8080/api/create-session", {questions:preguntas, classname:nomClase,description:desClase})
+    .then( data =>{
+      console.log(data)
+      username =  document.getElementById('name').value
+      pin = data.data.session.pin
+      let formattedPin = pin.split("-").join("");
+      console.log(formattedPin)
+      console.log(username)
+      joinSession({ formattedPin, username, history });
+    })
+    .catch((error) => {
+      console.log(error)
+    });
+
+    
   }
   
 
@@ -164,6 +210,10 @@ const Dashboard = () => {
           >
             Dashboard
           </Typography>
+          
+          {classData != null ? <Button variant="contained" style={{color:"white",backgroundColor: '#f44336'}} onClick={handleOpenDialog}>
+            <b>Crear Sesion de Clase</b>
+          </Button>  : <span></span>}
           <IconButton color="inherit" onClick={()=>signout()}>
             <ExitToAppIcon />
           </IconButton>
@@ -186,8 +236,27 @@ const Dashboard = () => {
       </Drawer>
       <main className={classes.content}>
         <div className={classes.appBarSpacer} />
-        {classData != null ? <VistaPreguntas {...{classData}}/> : <VistaClase  {...{handleDataCallback}}/>}
-        
+        {classData != null ? <VistaPreguntas {...{classData,handlePreguntas}}/> : <VistaClase  {...{handleDataCallback}}/>}
+        <Dialog open={openDialog} onClose={handleCloseDialog} aria-labelledby="form-dialog-title">
+        <DialogTitle id="form-dialog-title">Crear Sesion de Clase</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            id="name"
+            label="Nombre"
+            fullWidth
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog} color="primary">
+            Cancelar
+          </Button>
+          <Button onClick={crearSesion} color="primary">
+            Crear sesion
+          </Button>
+        </DialogActions>
+      </Dialog>
       </main>
       
     </div>

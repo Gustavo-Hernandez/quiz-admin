@@ -4,11 +4,14 @@ import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { Provider as AuthProvider } from "./context/AuthContext";
+import { Provider as QuizProvider } from "./context/QuizContext";
 
 ReactDOM.render(
   <React.StrictMode>
     <AuthProvider>
-      <App />
+      <QuizProvider>
+        <App />
+      </QuizProvider>
     </AuthProvider>
   </React.StrictMode>,
   document.getElementById("root")

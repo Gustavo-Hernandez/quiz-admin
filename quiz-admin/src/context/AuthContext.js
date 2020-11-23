@@ -114,6 +114,7 @@ const signup = (dispatch) => async ({
         email,
         password
       );
+      localStorage.setItem( 'email', email.replace('.','dot') );
       await user.sendEmailVerification();
     } catch (err) {
       let errorComponent;

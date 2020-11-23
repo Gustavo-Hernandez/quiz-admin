@@ -1,10 +1,12 @@
 import { createMuiTheme } from "@material-ui/core/styles";
+import React, { useEffect } from "react";
 import { ThemeProvider } from "@material-ui/styles";
 import { BrowserRouter } from "react-router-dom";
 import useAuthentication from "./hooks/useAuthentication";
 import AuthNavigator from "./navigation/AuthNavigator";
 import DashboardNavigator from "./navigation/DashboardNavigator";
 import VerificationNavigator from "./navigation/VerificationNavigator";
+import {Context as QuizContext} from "./context/QuizContext";
 
 const theme = createMuiTheme({
   palette: {
@@ -48,6 +50,7 @@ function App() {
   const setNavigator = () => {
     if (isAuthenticated) {
       if (isVerified) {
+        
         return <DashboardNavigator />;
       }
       return <VerificationNavigator />;
@@ -55,8 +58,10 @@ function App() {
     return <AuthNavigator />;
   };
   const routes = setNavigator();
+
   return (
     <BrowserRouter>
+      
       <ThemeProvider theme={theme}>{routes}</ThemeProvider>
     </BrowserRouter>
   );

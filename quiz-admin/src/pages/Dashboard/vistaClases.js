@@ -73,7 +73,6 @@ const VistaClase = props =>{
       getData(ClaseDataService.getAll())
         .then((dato) => {
           for (let obj in dato){
-            console.log(obj)
             clases.push(
               <Grid item>
               <Card className={classes.root}>
@@ -87,7 +86,7 @@ const VistaClase = props =>{
                 </CardContent>
                 <CardActions>
                   
-                  <Button size="small" onClick={() => callback(obj)}>Ver Preguntas</Button>
+                  <Button size="small" onClick={() => callback(obj,dato[obj].nombre,dato[obj].descripcion)}>Ver Preguntas</Button>
                   <Button size="small" style={{color:"red"}} onClick={() => borrarClase(obj)}>Borrar</Button>
                 </CardActions>
               </Card>

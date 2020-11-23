@@ -73,11 +73,18 @@ const useStyles = makeStyles((theme) => ({
 const VistaPreguntas = props =>{
     let [preguntas,setPreguntas] = useState([])
     let [loading, setLoading] = useState(true)
+    let pregSend = []
+    let [dataSended,setDataSended] = useState(false)
     const classData = props.classData
+    const pregSendFunc = props.handlePreguntas
     const classes = useStyles();
     var pregunta = ""
     var incisos = ['A','B','C','D']
     var respuestas = []
+    var [pregCambiar,setPregCambiar] =useState("")
+    var [resCambiar,setResCambiar]=useState([])
+    var [htmlCambiar,setHtmlCambiar]=useState([])
+    var [cambId,setCambId] = useState("")
     let db = new PreguntaDataService(classData)
     const [open, setOpen] = useState(false);
     const [modopen, setModopen] = useState(false);
@@ -130,15 +137,22 @@ const VistaPreguntas = props =>{
                     </Card>
                 </Grid>
           )
+          pregSend.push(dato[obj])
           
+        }
+        if(!dataSended){
+          sendPreguntas()
+          setDataSended(true)
         } 
-        
         setLoading(false)
       })
       .catch((error) => {
         console.log("The read failed: " + error);
       });
     })
+    const sendPreguntas = () =>{
+      pregSendFunc(pregSend)
+    }
     const handleOpen = () => {
         setOpen(true);
       };
@@ -147,66 +161,39 @@ const VistaPreguntas = props =>{
         setOpen(false);
       };
     const handleModopen = (dato,obj) => {
-      respuestas = []
-      pregunta = dato[obj].pregunta
+      setCambId(obj)
+      resCambiar = []
+      setPregCambiar(dato[obj].pregunta)
       for(var i = 0;i<4;i ++){
         let ans = dato[obj].respuestas[i].ans
         let corr = dato[obj].respuestas[i].corr
-        respuestas.push({ans,corr})
+        resCambiar.push({ans,corr})
       }
-      crearModal(pregunta,respuestas)
+      let html = []
+      let cont = 0
+      for(let res in resCambiar){
+          html.push(
+                    <div className={classes.ansTable}>
+                      <label for={"ans" + incisos[cont]} >{incisos[cont]})</label><br/>
+                      <input type="text" id={"ansCamb" + incisos[cont]} name={"ans" + incisos[cont]} className={classes.ansCell} value={resCambiar[res].ans}/>
+                      <input type="checkbox" id={"isCorrCamb" + incisos[cont]} name="isCorrA" className={classes.ansCell} style={{marginLeft:25}} checked={resCambiar[res].corr}/><br/>
+                    </div>
+                    )
+          cont += 1
+      }
+      setHtmlCambiar(html)
       setModopen(true)
     }
     const handleModclose = () =>{
       setModopen(false)
     }
-    const crearModal = (preg,respuestas) =>{
-      modalMod.push(
-        <Modal
-              aria-labelledby="transition-modal-title"
-              aria-describedby="transition-modal-description"
-              className={classes.modal}
-              open={modopen}
-              onClose={handleModclose}
-              disableBackdropClick = {true}
-              closeAfterTransition
-              BackdropComponent={Backdrop}
-              BackdropProps={{
-                timeout: 500,
-                }}>
-                <Fade in={modopen}>
-                <div className={classes.modalpaper}>
-                  
-                    <h2 id="transition-modal-title">Modificar Pregunta</h2>
-                    <form id="add-pregunta">
-                    <label for="pregunta" >Pregunta <span style={{marginLeft: 120}}>Correcta</span></label><br/>
-                    <input type="text" id="name" name="name" onChange={onChangePregunta} value={preg}/><br/>
-                    {() =>{
-                      let html = []
-                      let cont = 0
-                      for(let res in respuestas){
-                        html.push(
-                          <div className={classes.ansTable}>
-                              <label for={"ans" + incisos[cont]} >{incisos[cont]})</label><br/>
-                              <input type="text" id={"ans" + incisos[cont]} name={"ans" + incisos[cont]} className={classes.ansCell} value={res.ans}/>
-                              <input type="checkbox" id="isCorrA" name="isCorrA" className={classes.ansCell} style={{marginLeft:25}} value={res.corr}/><br/>
-                          </div>
-                        )
-                      }
-                      return html
-                    }}
-                    </form>
-                    <br/>
-                    <Button variant="contained" color="secondary" onClick={handleModclose} style={{marginRight: 5}}>Cerrar</Button>
-                    <Button variant="contained" color="primary" >Guardar</Button>
-                </div>
-                </Fade>
-          </Modal>
-      )
-    }
+    
       const onChangePregunta = (e) => {
         pregunta = e.target.value
       }
+    const onChangePreguntaCambiar = (e) =>{
+      setPregCambiar(e.target.value)
+    }
       const guardarPregunta = () =>{
         respuestas= []
         for(var i = 0;i<4;i ++){
@@ -232,6 +219,33 @@ const VistaPreguntas = props =>{
         });
 
       }
+      const actualizarPregunta = () =>{
+        respuestas= []
+        for(var i = 0;i<4;i ++){
+          let ans = document.getElementById("ansCamb"+incisos[i]).value
+          let corr = document.getElementById("isCorrCamb"+incisos[i]).checked
+          respuestas.push({ans,corr})
+        }
+        
+        let data ={
+          pregunta : pregCambiar,
+          respuestas : respuestas
+        }
+        db.create(data)
+        .then(() => {
+          pregunta = ""
+          respuestas = []
+          pregCambiar =""
+          db.delete(cambId)
+          alert("Se actualizo la Pregunta!");
+          handleModclose()
+          window.location.reload();
+        })
+        .catch((e) => {
+          alert("error")
+          console.log(e);
+        });
+      }
       const borrarPregunta = (key) =>{
         db.delete(key)
         alert("Se borro la Pregunta")
@@ -241,7 +255,6 @@ const VistaPreguntas = props =>{
         return (<div> <CircularProgress /> </div>)
       }
     return(
-      
     <div>
         <Container maxWidth="lg" className={classes.container}>
             <Grid container spacing={3}>
@@ -305,7 +318,33 @@ const VistaPreguntas = props =>{
           </Modal>
 
            {/* Modals de Modificar pregunta */}
-           {modopen ? modalMod : <span/>}
+           <Modal
+              aria-labelledby="transition-modal-title"
+              aria-describedby="transition-modal-description"
+              className={classes.modal}
+              open={modopen}
+              onClose={handleModclose}
+              disableBackdropClick = {true}
+              closeAfterTransition
+              BackdropComponent={Backdrop}
+              BackdropProps={{
+                timeout: 500,
+                }}>
+                <Fade in={modopen}>
+                <div className={classes.modalpaper}>
+                  
+                    <h2 id="transition-modal-title">Modificar Pregunta</h2>
+                    <form id="add-pregunta">
+                    <label for="pregunta" >Pregunta <span style={{marginLeft: 120}}>Correcta</span></label><br/>
+                    <input type="text" id="nameCambiar" name="name" onChange={onChangePreguntaCambiar} value={pregCambiar}/><br/>
+                      {htmlCambiar}
+                    </form>
+                    <br/>
+                    <Button variant="contained" color="secondary" onClick={handleModclose} style={{marginRight: 5}}>Cerrar</Button>
+                    <Button variant="contained" color="primary" onClick={actualizarPregunta} >Guardar</Button>
+                </div>
+                </Fade>
+          </Modal>
            
 
 
