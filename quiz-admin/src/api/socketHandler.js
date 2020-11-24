@@ -54,6 +54,15 @@ export const subscribeToFeedback = (cb) => {
     return cb(null, msg);
   });
 };
+export const subscribeToResults = (cb) => {
+  if (!socket) {
+    return true;
+  }
+  socket.on("results", (msg) => {
+    console.log("Results Received");
+    return cb(null, msg);
+  });
+};
 
 export const sendMessage = (sender, message, room) => {
   if (socket) {
@@ -82,5 +91,18 @@ export const sendEndQuiz = ( room) => {
 export const sendNextQuestion = (room) => {
   if (socket) {
     socket.emit("next_question", {room});
+  }
+};
+
+export const sendEndSession = (room) => {
+  if (socket) {
+    socket.emit("end_session", {room});
+  }
+};
+
+
+export const relog = (room, uid) => {
+  if (socket) {
+    socket.emit("relog", {room, uid});
   }
 };

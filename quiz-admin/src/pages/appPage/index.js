@@ -21,9 +21,13 @@ import {
   subscribeToQuestions,
   sendNextQuestion,
   sendEndQuiz,
+  subscribeToResults,
+  relog,
+  sendEndSession
 } from "../../api/socketHandler";
 import Chat from "./Chat";
 import Quiz from "./Quiz";
+import Results from "./Results";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -64,7 +68,7 @@ const Dashboard = () => {
     clearSession,
   } = useContext(QuizContext);
 
-  const { questions, title } = session;
+  const { title } = session;
   const [showChat, setShowChat] = useState(false);
   const [showSnackbar, setShowSnackbar] = useState(false);
   const [snackMessage, setSnackMessage] = useState("");
@@ -73,11 +77,14 @@ const Dashboard = () => {
   const [chatMessages, setChatMessages] = useState([]);
   const [showQuiz, setShowQuiz] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState({ pregunta: "" });
+  const [results, setResults] = useState([]);
+  const [showResults, setShowResults] = useState(false);
   const classes = useStyles();
 
   //Handle Connection
   useEffect(() => {
     initiateSocket(session.pin, session.user.username);
+    relog(session.pin,session.user.localId);
     subscribeToChat((err, data) => {
       if (err) {
         return;
@@ -100,6 +107,13 @@ const Dashboard = () => {
       }
       setCurrentQuestion(question);
     });
+    subscribeToResults((err, data) => {
+      if (err) {
+        return;
+      }
+      setShowResults(true);
+      setResults(data);
+    });
     subscribeToQuiz((err, data) => {
       if (err) {
         return;
@@ -109,7 +123,7 @@ const Dashboard = () => {
     return () => {
       disconnectSocket();
     };
-  }, [session.pin, session.user.username]);
+  }, [session.pin, session.user]);
 
   const handleToggle = (event) => {
     setAnchorEl(event.currentTarget);
@@ -119,6 +133,11 @@ const Dashboard = () => {
   const handleClose = () => {
     setShowChat(false);
     setAnchorEl(null);
+  };
+
+  const handleExit = () => {
+    clearSession();
+    sendEndSession(session.pin);
   };
 
   const handleMessage = (value) => {
@@ -151,7 +170,7 @@ const Dashboard = () => {
       <div className={classes.buttonContainer}>
         <Button
           variant="contained"
-          onClick={clearSession}
+          onClick={handleExit}
           className={classes.buttonExit}
         >
           End Session
@@ -179,6 +198,19 @@ const Dashboard = () => {
               Start Quiz
             </Button>
           )
+        )}
+
+        {showResults && results.length > 0 && (
+          <Results results={results} handleClose={()=>setShowResults(false)}/>
+        )}
+        {!showResults && results.length > 0 && (
+          <Button
+            variant="contained"
+            onClick={() => setShowResults(true)}
+            className={classes.buttonExit}
+          >
+            See results
+          </Button>
         )}
       </div>
       <Popover
