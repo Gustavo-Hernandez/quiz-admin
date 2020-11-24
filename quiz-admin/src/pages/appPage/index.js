@@ -4,8 +4,6 @@ import { makeStyles } from "@material-ui/core/styles";
 import { ChatBubble, Close } from "@material-ui/icons";
 import {
   Button,
-  ButtonGroup,
-  Tooltip,
   Fab,
   Popover,
   Snackbar,
@@ -17,11 +15,19 @@ import {
   disconnectSocket,
   subscribeToChat,
   subscribeToFeedback,
-  sendFeedback,
+  sendStartQuiz,
   sendMessage,
+  subscribeToQuiz,
+  subscribeToQuestions,
+  sendNextQuestion,
+  sendEndQuiz,
+  subscribeToResults,
+  relog,
+  sendEndSession
 } from "../../api/socketHandler";
 import Chat from "./Chat";
 import Quiz from "./Quiz";
+import Results from "./Results";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -62,16 +68,24 @@ const Dashboard = () => {
     clearSession,
   } = useContext(QuizContext);
 
+  const { title } = session;
   const [showChat, setShowChat] = useState(false);
   const [showSnackbar, setShowSnackbar] = useState(false);
   const [snackMessage, setSnackMessage] = useState("");
+  const [quizEnding, setQuizEnding] = useState(false);
+  const [quizEnded, setQuizEnded] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [chatMessages, setChatMessages] = useState([]);
+  const [showQuiz, setShowQuiz] = useState(false);
+  const [currentQuestion, setCurrentQuestion] = useState({ pregunta: "" });
+  const [results, setResults] = useState([]);
+  const [showResults, setShowResults] = useState(false);
   const classes = useStyles();
 
   //Handle Connection
   useEffect(() => {
     initiateSocket(session.pin, session.user.username);
+    relog(session.pin,session.user.localId);
     subscribeToChat((err, data) => {
       if (err) {
         return;
@@ -85,10 +99,35 @@ const Dashboard = () => {
       setShowSnackbar(true);
       setSnackMessage(data);
     });
+    subscribeToQuestions((err, { offset, question }) => {
+      if (err) {
+        return;
+      }
+      if (offset === 0) {
+        setQuizEnding(true);
+      }
+      setCurrentQuestion(question);
+    });
+    subscribeToResults((err, data) => {
+      if (err) {
+        return;
+      }
+      setQuizEnded(true);
+      setQuizEnding(true);
+      setShowQuiz(false);
+      setShowResults(true);
+      setResults(data);
+    });
+    subscribeToQuiz((err, data) => {
+      if (err) {
+        return;
+      }
+      setShowQuiz(data);
+    });
     return () => {
       disconnectSocket();
     };
-  }, [session.pin, session.user.username]);
+  }, [session.pin, session.user]);
 
   const handleToggle = (event) => {
     setAnchorEl(event.currentTarget);
@@ -98,6 +137,11 @@ const Dashboard = () => {
   const handleClose = () => {
     setShowChat(false);
     setAnchorEl(null);
+  };
+
+  const handleExit = () => {
+    clearSession();
+    sendEndSession(session.pin);
   };
 
   const handleMessage = (value) => {
@@ -130,39 +174,48 @@ const Dashboard = () => {
       <div className={classes.buttonContainer}>
         <Button
           variant="contained"
-          onClick={clearSession}
+          onClick={handleExit}
           className={classes.buttonExit}
         >
           End Session
         </Button>
-      <p style={{ fontWeight: "bold",color: "white",fontSize: "15px" }}>PIN : {session.pin}</p>
-        <ButtonGroup
-          color="primary"
-          variant="contained"
-          aria-label="contained primary button group"
-        >
-          <Tooltip title="This is anonymous, no one will know.">
-            <Button
-              style={{ fontWeight: "bold",color: "white" }}
-              disabled
-              onClick={() => sendFeedback("I'm confused!", session.pin)}
-            >
-              8 Students are confused
-            </Button>
-          </Tooltip>
-          <Tooltip title="This is anonymous, no one will know.">
-            <Button
-              style={{ fontWeight: "bold",color: "white" }}
-              disabled
-              onClick={() => sendFeedback("Please slow down!", session.pin)}
-            >
-              5 Students whant you to slow down
-            </Button>
-          </Tooltip>
-        </ButtonGroup>
+        <p style={{ fontWeight: "bold", color: "white", fontSize: "15px" }}>
+          PIN : {session.pin}
+        </p>
       </div>
       <div className={classes.quizContainer}>
-        <Quiz />
+        {showQuiz ? (
+          <Quiz
+            title={title}
+            isEnding={quizEnding}
+            question={currentQuestion.pregunta}
+            handleEnd={() => sendEndQuiz(session.pin)}
+            handleNext={() => sendNextQuestion(session.pin)}
+          />
+        ) : (
+          !quizEnding && (
+            <Button
+              variant="contained"
+              onClick={() => sendStartQuiz(session.pin)}
+              className={classes.buttonExit}
+            >
+              Start Quiz
+            </Button>
+          )
+        )}
+
+        {showResults  && (
+          <Results results={results} handleClose={()=>setShowResults(false)}/>
+        )}
+        {!showResults && quizEnded && (
+          <Button
+            variant="contained"
+            onClick={() => setShowResults(true)}
+            className={classes.buttonExit}
+          >
+            See results
+          </Button>
+        )}
       </div>
       <Popover
         id={id}
