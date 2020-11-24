@@ -36,7 +36,15 @@ export const subscribeToQuiz = (cb) => {
     return cb(null, val);
   });
 };
-
+export const subscribeToQuestions = (cb) => {
+  if (!socket) {
+    return true;
+  }
+  socket.on("question", (val) => {
+    console.log("Question received");
+    return cb(null, val);
+  });
+};
 export const subscribeToFeedback = (cb) => {
   if (!socket) {
     return true;
@@ -62,5 +70,10 @@ export const sendFeedback = (value, room) => {
 export const sendStartQuiz = ( room) => {
   if (socket) {
     socket.emit("start_quiz", {room});
+  }
+};
+export const sendNextQuestion = (room) => {
+  if (socket) {
+    socket.emit("next_question", {room});
   }
 };

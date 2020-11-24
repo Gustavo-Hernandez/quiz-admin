@@ -4,8 +4,6 @@ import { makeStyles } from "@material-ui/core/styles";
 import { ChatBubble, Close } from "@material-ui/icons";
 import {
   Button,
-  ButtonGroup,
-  Tooltip,
   Fab,
   Popover,
   Snackbar,
@@ -19,7 +17,9 @@ import {
   subscribeToFeedback,
   sendStartQuiz,
   sendMessage,
-  subscribeToQuiz
+  subscribeToQuiz,
+  subscribeToQuestions,
+  sendNextQuestion,
 } from "../../api/socketHandler";
 import Chat from "./Chat";
 import Quiz from "./Quiz";
@@ -63,13 +63,14 @@ const Dashboard = () => {
     clearSession,
   } = useContext(QuizContext);
 
-  const {questions, title} = session;
+  const { questions, title } = session;
   const [showChat, setShowChat] = useState(false);
   const [showSnackbar, setShowSnackbar] = useState(false);
   const [snackMessage, setSnackMessage] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
   const [chatMessages, setChatMessages] = useState([]);
   const [showQuiz, setShowQuiz] = useState(false);
+  const [currentQuestion, setCurrentQuestion] = useState({ pregunta: "" });
   const classes = useStyles();
 
   //Handle Connection
@@ -87,6 +88,12 @@ const Dashboard = () => {
       }
       setShowSnackbar(true);
       setSnackMessage(data);
+    });
+    subscribeToQuestions((err, data) => {
+      if (err) {
+        return;
+      }
+      setCurrentQuestion(data);
     });
     subscribeToQuiz((err, data) => {
       if (err) {
@@ -144,16 +151,26 @@ const Dashboard = () => {
         >
           End Session
         </Button>
-      <p style={{ fontWeight: "bold",color: "white",fontSize: "15px" }}>PIN : {session.pin}</p>
+        <p style={{ fontWeight: "bold", color: "white", fontSize: "15px" }}>
+          PIN : {session.pin}
+        </p>
       </div>
       <div className={classes.quizContainer}>
-        {showQuiz ? <Quiz title={title} /> :   <Button
-          variant="contained"
-          onClick={()=>sendStartQuiz(session.pin)}
-          className={classes.buttonExit}
-        >
-          Start Quiz
-        </Button>}
+        {showQuiz ? (
+          <Quiz
+            title={title}
+            question={currentQuestion.pregunta}
+            handleNext={() => sendNextQuestion(session.pin)}
+          />
+        ) : (
+          <Button
+            variant="contained"
+            onClick={() => sendStartQuiz(session.pin)}
+            className={classes.buttonExit}
+          >
+            Start Quiz
+          </Button>
+        )}
       </div>
       <Popover
         id={id}

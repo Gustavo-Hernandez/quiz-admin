@@ -44,51 +44,28 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: "bold",
     "&:hover": {
       cursor: "pointer",
-      boxShadow: "0px 0px 2px 1px rgba(0,0,0,0.45)"
+      boxShadow: "0px 0px 2px 1px rgba(0,0,0,0.45)",
     },
   },
 }));
 
-const Quiz = ({ question, title }) => {
+const Quiz = ({ question, title, handleNext, buttonText }) => {
   const classes = useStyles();
   return (
     <div className={classes.root}>
       <h3 className={classes.questionHeader}>{title}</h3>
       <div className={classes.questionContainer}>
-        <div className={classes.question}>This is a question</div>
+        <div className={classes.question}>{question}</div>
       </div>
       <div className={classes.optionsContainer}>
         <Grid container spacing={1} justify="center">
-          <Grid item xs={5}>
+          <Grid item xs={10}>
             <button
+              onClick={handleNext}
               className={classes.quizOption}
               style={{ backgroundColor: "#f44336" }}
             >
-              A) Option 1
-            </button>
-          </Grid>
-          <Grid item xs={5}>
-            <button
-              className={classes.quizOption}
-              style={{ backgroundColor: "#FFC107" }}
-            >
-              B) Option 2
-            </button>
-          </Grid>
-          <Grid item xs={5}>
-            <button
-              className={classes.quizOption}
-              style={{ backgroundColor: "#2196F3" }}
-            >
-              C) Option 3
-            </button>
-          </Grid>
-          <Grid item xs={5}>
-            <button
-              className={classes.quizOption}
-              style={{ backgroundColor: "#8BC34A" }}
-            >
-              D) Option 4
+              Next
             </button>
           </Grid>
         </Grid>
