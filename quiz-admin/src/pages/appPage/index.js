@@ -20,6 +20,7 @@ import {
   subscribeToQuiz,
   subscribeToQuestions,
   sendNextQuestion,
+  sendEndQuiz,
 } from "../../api/socketHandler";
 import Chat from "./Chat";
 import Quiz from "./Quiz";
@@ -67,6 +68,7 @@ const Dashboard = () => {
   const [showChat, setShowChat] = useState(false);
   const [showSnackbar, setShowSnackbar] = useState(false);
   const [snackMessage, setSnackMessage] = useState("");
+  const [quizEnding, setQuizEnding] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [chatMessages, setChatMessages] = useState([]);
   const [showQuiz, setShowQuiz] = useState(false);
@@ -89,17 +91,20 @@ const Dashboard = () => {
       setShowSnackbar(true);
       setSnackMessage(data);
     });
-    subscribeToQuestions((err, data) => {
+    subscribeToQuestions((err, { offset, question }) => {
       if (err) {
         return;
       }
-      setCurrentQuestion(data);
+      if (offset === 0) {
+        setQuizEnding(true);
+      }
+      setCurrentQuestion(question);
     });
     subscribeToQuiz((err, data) => {
       if (err) {
         return;
       }
-      setShowQuiz(true);
+      setShowQuiz(data);
     });
     return () => {
       disconnectSocket();
@@ -159,17 +164,21 @@ const Dashboard = () => {
         {showQuiz ? (
           <Quiz
             title={title}
+            isEnding={quizEnding}
             question={currentQuestion.pregunta}
+            handleEnd={() => sendEndQuiz(session.pin)}
             handleNext={() => sendNextQuestion(session.pin)}
           />
         ) : (
-          <Button
-            variant="contained"
-            onClick={() => sendStartQuiz(session.pin)}
-            className={classes.buttonExit}
-          >
-            Start Quiz
-          </Button>
+          !quizEnding && (
+            <Button
+              variant="contained"
+              onClick={() => sendStartQuiz(session.pin)}
+              className={classes.buttonExit}
+            >
+              Start Quiz
+            </Button>
+          )
         )}
       </div>
       <Popover

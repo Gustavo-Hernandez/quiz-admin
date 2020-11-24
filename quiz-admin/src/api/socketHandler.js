@@ -72,6 +72,13 @@ export const sendStartQuiz = ( room) => {
     socket.emit("start_quiz", {room});
   }
 };
+
+export const sendEndQuiz = ( room) => {
+  if (socket) {
+    socket.emit("end_quiz", {room});
+  }
+};
+
 export const sendNextQuestion = (room) => {
   if (socket) {
     socket.emit("next_question", {room});

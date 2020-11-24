@@ -49,7 +49,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Quiz = ({ question, title, handleNext, buttonText }) => {
+const Quiz = ({ question, title, handleNext, handleEnd, isEnding }) => {
   const classes = useStyles();
   return (
     <div className={classes.root}>
@@ -60,13 +60,19 @@ const Quiz = ({ question, title, handleNext, buttonText }) => {
       <div className={classes.optionsContainer}>
         <Grid container spacing={1} justify="center">
           <Grid item xs={10}>
-            <button
+           {isEnding ?  <button
+              onClick={handleEnd}
+              className={classes.quizOption}
+              style={{ backgroundColor: "#f44336" }}
+            >
+              End Quiz
+            </button>:<button
               onClick={handleNext}
               className={classes.quizOption}
               style={{ backgroundColor: "#f44336" }}
             >
-              Next
-            </button>
+              Next Question
+            </button>}
           </Grid>
         </Grid>
       </div>
