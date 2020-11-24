@@ -100,55 +100,57 @@ const VistaPreguntas = props =>{
     };
 
     useEffect(() =>{
-      getData(db.getAll())
-      .then((dato) => {
-        for (let obj in dato){
-          let cont = 0
-          preguntas.push(
-            <Grid item>
-                  <Card className={classes.root}>
-                    <CardContent>
-                        
-                        <Typography variant="h5" component="h2">
-                          {dato[obj].pregunta}
-                        </Typography>
-                        <Typography variant="body2" component="p" >
-                         {incisos[cont]})  {dato[obj].respuestas[cont].ans} {dato[obj].respuestas[cont].corr? <CheckIcon/> : <span/> } 
-                        </Typography>
-                        <br/>
-                        <Typography variant="body2" component="p">
-                        {incisos[cont +=1]}) {dato[obj].respuestas[cont].ans} {dato[obj].respuestas[cont].corr? <CheckIcon/> : <span/> } 
-                        </Typography>
-                        <br/>
-                        
-                        <Typography variant="body2" component="p">
-                        {incisos[cont +=1]}) {dato[obj].respuestas[cont].ans} {dato[obj].respuestas[cont].corr? <CheckIcon/> : <span/> } 
-                        </Typography>
-                        <br/>
-                        <Typography variant="body2" component="p">
-                        {incisos[cont +=1]}) {dato[obj].respuestas[cont].ans} {dato[obj].respuestas[cont].corr? <CheckIcon/> : <span/> } 
-                        </Typography>
+      if(loading){
+        getData(db.getAll())
+        .then((dato) => {
+          for (let obj in dato){
+            let cont = 0
+            preguntas.push(
+              <Grid item>
+                    <Card className={classes.root}>
+                      <CardContent>
+                          
+                          <Typography variant="h5" component="h2">
+                            {dato[obj].pregunta}
+                          </Typography>
+                          <Typography variant="body2" component="p" >
+                          {incisos[cont]})  {dato[obj].respuestas[cont].ans} {dato[obj].respuestas[cont].corr? <CheckIcon/> : <span/> } 
+                          </Typography>
+                          <br/>
+                          <Typography variant="body2" component="p">
+                          {incisos[cont +=1]}) {dato[obj].respuestas[cont].ans} {dato[obj].respuestas[cont].corr? <CheckIcon/> : <span/> } 
+                          </Typography>
+                          <br/>
+                          
+                          <Typography variant="body2" component="p">
+                          {incisos[cont +=1]}) {dato[obj].respuestas[cont].ans} {dato[obj].respuestas[cont].corr? <CheckIcon/> : <span/> } 
+                          </Typography>
+                          <br/>
+                          <Typography variant="body2" component="p">
+                          {incisos[cont +=1]}) {dato[obj].respuestas[cont].ans} {dato[obj].respuestas[cont].corr? <CheckIcon/> : <span/> } 
+                          </Typography>
 
-                    </CardContent>
-                    <CardActions>
-                        <Button size="small" onClick={() => handleModopen(dato,obj)}>Modificar</Button>
-                        <Button size="small" style={{color:"red"}} onClick={() => borrarPregunta(obj)}>Borrar</Button>
-                    </CardActions>
-                    </Card>
-                </Grid>
-          )
-          pregSend.push(dato[obj])
-          
-        }
-        if(!dataSended){
-          sendPreguntas()
-          setDataSended(true)
-        } 
-        setLoading(false)
-      })
-      .catch((error) => {
-        console.log("The read failed: " + error);
-      });
+                      </CardContent>
+                      <CardActions>
+                          <Button size="small" onClick={() => handleModopen(dato,obj)}>Modificar</Button>
+                          <Button size="small" style={{color:"red"}} onClick={() => borrarPregunta(obj)}>Borrar</Button>
+                      </CardActions>
+                      </Card>
+                  </Grid>
+            )
+            pregSend.push(dato[obj])
+            
+          }
+          if(!dataSended){
+            sendPreguntas()
+            setDataSended(true)
+          } 
+          setLoading(false)
+        })
+        .catch((error) => {
+          console.log("The read failed: " + error);
+        })
+    }
     })
     const sendPreguntas = () =>{
       pregSendFunc(pregSend)
@@ -176,7 +178,8 @@ const VistaPreguntas = props =>{
                     <div className={classes.ansTable}>
                       <label for={"ans" + incisos[cont]} >{incisos[cont]})</label><br/>
                       <input type="text" id={"ansCamb" + incisos[cont]} name={"ans" + incisos[cont]} className={classes.ansCell} value={resCambiar[res].ans}/>
-                      <input type="checkbox" id={"isCorrCamb" + incisos[cont]} name="isCorrA" className={classes.ansCell} style={{marginLeft:25}} checked={resCambiar[res].corr}/><br/>
+                      {resCambiar[res].corr ? <span><input type="checkbox" id={"isCorrCamb" + incisos[cont]} name={"isCorrCamb" + incisos[cont]} className={classes.ansCell} style={{marginLeft:25}} defaultChecked="true"/><br/></span> :<span><input type="checkbox" id={"isCorrCamb" + incisos[cont]} name={"isCorrCamb" + incisos[cont]} className={classes.ansCell} style={{marginLeft:25}}/><br/></span> }
+                      
                     </div>
                     )
           cont += 1
@@ -211,7 +214,8 @@ const VistaPreguntas = props =>{
           respuestas = []
           alert("Se agrego la Pregunta!");
           handleClose()
-          window.location.reload();
+          setPreguntas([])
+          setLoading(true)
         })
         .catch((e) => {
           alert("error")
@@ -239,7 +243,8 @@ const VistaPreguntas = props =>{
           db.delete(cambId)
           alert("Se actualizo la Pregunta!");
           handleModclose()
-          window.location.reload();
+          setPreguntas([])
+          setLoading(true)
         })
         .catch((e) => {
           alert("error")
@@ -249,7 +254,8 @@ const VistaPreguntas = props =>{
       const borrarPregunta = (key) =>{
         db.delete(key)
         alert("Se borro la Pregunta")
-        window.location.reload()
+        setPreguntas([])
+        setLoading(true)
       }
       if(loading){
         return (<div> <CircularProgress /> </div>)

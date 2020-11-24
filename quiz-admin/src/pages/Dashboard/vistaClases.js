@@ -70,6 +70,7 @@ const VistaClase = props =>{
     const [open, setOpen] = useState(false);
     
     useEffect(() =>{
+      if(loading){
       getData(ClaseDataService.getAll())
         .then((dato) => {
           for (let obj in dato){
@@ -98,7 +99,8 @@ const VistaClase = props =>{
         })
         .catch((error) => {
           console.log("The read failed: " + error);
-        });
+        })
+      }
     })
     const handleOpen = () => {
         setOpen(true);
@@ -123,7 +125,8 @@ const VistaClase = props =>{
         .then(() => {
           alert("Se agrego la clase!");
           handleClose()
-          window.location.reload();
+          setClases([])
+          setLoading(true)
         })
         .catch((e) => {
           alert("error")
@@ -133,7 +136,8 @@ const VistaClase = props =>{
       const borrarClase = (key) =>{
         ClaseDataService.delete(key)
         alert("Se borro la clase")
-        window.location.reload()
+        setClases([])
+        setLoading(true)
       }
       const getData = (ref) => {
         return new Promise((resolve, reject) => {

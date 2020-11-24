@@ -1,7 +1,6 @@
 import React, { useContext,useEffect } from "react";
 import clsx from "clsx";
 import axios from "axios";
-import quizHandler from "../../api/quizHandler";
 import { makeStyles } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import Drawer from "@material-ui/core/Drawer";

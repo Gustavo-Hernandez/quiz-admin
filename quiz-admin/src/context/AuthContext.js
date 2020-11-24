@@ -224,6 +224,7 @@ const sendRecoveryEmail = (dispatch) => async ({ email }) => {
 };
 
 const signout = (dispatch) => async () => {
+  localStorage.removeItem('email');
   auth.signOut();
 };
 
