@@ -73,6 +73,7 @@ const Dashboard = () => {
   const [showSnackbar, setShowSnackbar] = useState(false);
   const [snackMessage, setSnackMessage] = useState("");
   const [quizEnding, setQuizEnding] = useState(false);
+  const [quizEnded, setQuizEnded] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [chatMessages, setChatMessages] = useState([]);
   const [showQuiz, setShowQuiz] = useState(false);
@@ -111,6 +112,9 @@ const Dashboard = () => {
       if (err) {
         return;
       }
+      setQuizEnded(true);
+      setQuizEnding(true);
+      setShowQuiz(false);
       setShowResults(true);
       setResults(data);
     });
@@ -200,10 +204,10 @@ const Dashboard = () => {
           )
         )}
 
-        {showResults && results.length > 0 && (
+        {showResults  && (
           <Results results={results} handleClose={()=>setShowResults(false)}/>
         )}
-        {!showResults && results.length > 0 && (
+        {!showResults && quizEnded && (
           <Button
             variant="contained"
             onClick={() => setShowResults(true)}
